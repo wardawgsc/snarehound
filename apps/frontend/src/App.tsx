@@ -15,6 +15,15 @@ import {
   type UnknownCorrectionItem
 } from "./api";
 
+declare global {
+  interface Window {
+    SnareHoundAHK?: {
+      sendShowLocation?: () => void;
+      // Add other methods if needed
+    };
+  }
+}
+
 const SESSION_STORAGE_KEY = "snarehound.sessionToken";
 const EXEC_OPEN_DURATION_MS = 3900338;
 const EXEC_CLOSE_DURATION_MS = 7200623;
@@ -221,12 +230,49 @@ export function App() {
     const orgName = asString(summary?.organization) || asString(org?.name) || "None";
     const orgSid = asString(summary?.organizationSid) || asString(org?.sid) || "N/A";
     const orgRank = asString(summary?.organizationRank) || asString(org?.rank) || "N/A";
-    // Try to get org member count from common fields
-    let orgMembers =
-      asString(org?.member_count) ||
-      asString(org?.members) ||
-      asString(org?.stars) ||
-      "N/A";
+    // Always prefer the 'members' field as per Star Citizen API
+    let orgMembers = "N/A";
+    if (org && typeof org.members !== "undefined") {
+      if (typeof org.members === "number" && Number.isFinite(org.members)) {
+        orgMembers = String(org.members);
+      } else if (typeof org.members === "string" && /^\d+$/.test(org.members)) {
+        orgMembers = org.members;
+      }
+    }
+    // Fallback to other fields if 'members' is not found or not valid
+    if (orgMembers === "N/A") {
+      orgMembers =
+        asString(org?.member_count) ||
+        asString(org?.stars) ||
+        asString(org?.memberCount) ||
+        asString(org?.membercount) ||
+        asString(org?.total_members) ||
+        asString(org?.totalMembers) ||
+        asString(org?.population) ||
+        asString(org?.org_member_count) ||
+        asString(org?.orgMembers) ||
+        asString(org?.orgmembers) ||
+        asString(org?.org_population) ||
+        asString(org?.orgPopulation) ||
+        asString(org?.org_size) ||
+        asString(org?.orgSize) ||
+        asString(org?.size) ||
+        "N/A";
+      // If still not a number, try to find a number in org object
+      if (orgMembers === "N/A" && org) {
+        for (const key of Object.keys(org)) {
+          const value = org[key];
+          if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+            orgMembers = String(value);
+            break;
+          }
+          if (typeof value === "string" && /^\d+$/.test(value)) {
+            orgMembers = value;
+            break;
+          }
+        }
+      }
+    }
 
     const affiliations = affiliationsRaw
       .map((entry) => {
@@ -438,17 +484,17 @@ export function App() {
   }
 
   function openProfileLocation() {
-    const summary = asObject(lookupResponse?.summary);
-    const profile = asObject(asObject(lookupResponse?.profile)?.profile);
-    const page = asObject(profile?.page);
-    const url = asString(summary?.profileUrl) || asString(page?.url);
-
-    if (!url) {
-      setStatus("No profile URL available from current lookup result.");
-      return;
+    // New functionality: Activate Star Citizen window and send /showlocation command
+    setStatus("Activating Star Citizen and sending /showlocation...");
+    // This requires an external script or AHK integration
+    // Example: Use window.SnareHoundAHK if available
+    if (window.SnareHoundAHK && typeof window.SnareHoundAHK.sendShowLocation === "function") {
+      window.SnareHoundAHK.sendShowLocation();
+      setStatus("/showlocation command sent to Star Citizen.");
+    } else {
+      setStatus("AHK integration not available. Please ensure SnareHound AHK is running.");
     }
-
-    window.open(url, "_blank", "noopener,noreferrer");
+    // Do NOT erase clipboard after command
   }
 
   function nukeGlobal() {
@@ -596,8 +642,8 @@ export function App() {
             <button onClick={() => setDetailMode(0)}>› R_DISPLAYINFO 0 ‹</button>
             <button onClick={() => setIsPaused((value) => !value)}>› {isPaused ? "RESUME_OPS" : "PAUSE_OPS"} ‹</button>
             <button onClick={sendDevDispatchTest}>› TEST_ALARM ‹</button>
-            <button onClick={() => void loadRecentHistory()}>› VIEW_HISTORY ‹</button>
-            <button onClick={() => void purgeRecentHistory()}>› PURGE_DATA ‹</button>
+            <button onClick={() => loadRecentHistory()}>› VIEW_HISTORY ‹</button>
+            <button onClick={() => purgeRecentHistory()}>› PURGE_DATA ‹</button>
             <button onClick={nukeGlobal}>NUKE_GLOBAL</button>
           </div>
 

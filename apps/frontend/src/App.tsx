@@ -227,50 +227,29 @@ export function App() {
     const profileUrl = asString(summary?.profileUrl) || asString(profilePage?.url);
     const avatarUrl = asString(summary?.avatarUrl) || asString(profile.image);
     const badge = asString(summary?.badge) || asString(profile.badge) || "N/A";
+    const badgeImage = asString(summary?.badge_image) || asString(profile.badge_image) || "";
     const orgName = asString(summary?.organization) || asString(org?.name) || "None";
     const orgSid = asString(summary?.organizationSid) || asString(org?.sid) || "N/A";
     const orgRank = asString(summary?.organizationRank) || asString(org?.rank) || "N/A";
-    // Always prefer the 'members' field as per Star Citizen API
+    // Prefer org.members field for member count, fallback to other fields if not present
     let orgMembers = "N/A";
-    if (org && typeof org.members !== "undefined") {
+    if (org) {
       if (typeof org.members === "number" && Number.isFinite(org.members)) {
         orgMembers = String(org.members);
       } else if (typeof org.members === "string" && /^\d+$/.test(org.members)) {
         orgMembers = org.members;
-      }
-    }
-    // Fallback to other fields if 'members' is not found or not valid
-    if (orgMembers === "N/A") {
-      orgMembers =
-        asString(org?.member_count) ||
-        asString(org?.stars) ||
-        asString(org?.memberCount) ||
-        asString(org?.membercount) ||
-        asString(org?.total_members) ||
-        asString(org?.totalMembers) ||
-        asString(org?.population) ||
-        asString(org?.org_member_count) ||
-        asString(org?.orgMembers) ||
-        asString(org?.orgmembers) ||
-        asString(org?.org_population) ||
-        asString(org?.orgPopulation) ||
-        asString(org?.org_size) ||
-        asString(org?.orgSize) ||
-        asString(org?.size) ||
-        "N/A";
-      // If still not a number, try to find a number in org object
-      if (orgMembers === "N/A" && org) {
-        for (const key of Object.keys(org)) {
-          const value = org[key];
-          if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-            orgMembers = String(value);
-            break;
-          }
-          if (typeof value === "string" && /^\d+$/.test(value)) {
-            orgMembers = value;
-            break;
-          }
-        }
+      } else if (typeof org.member_count === "number" && Number.isFinite(org.member_count)) {
+        orgMembers = String(org.member_count);
+      } else if (typeof org.member_count === "string" && /^\d+$/.test(org.member_count)) {
+        orgMembers = org.member_count;
+      } else if (typeof org.total_members === "number" && Number.isFinite(org.total_members)) {
+        orgMembers = String(org.total_members);
+      } else if (typeof org.total_members === "string" && /^\d+$/.test(org.total_members)) {
+        orgMembers = org.total_members;
+      } else if (typeof org.population === "number" && Number.isFinite(org.population)) {
+        orgMembers = String(org.population);
+      } else if (typeof org.population === "string" && /^\d+$/.test(org.population)) {
+        orgMembers = org.population;
       }
     }
 
@@ -299,6 +278,7 @@ export function App() {
       location,
       languages: languages || "N/A",
       badge,
+      badgeImage,
       profileUrl,
       avatarUrl,
       orgName,
@@ -641,7 +621,12 @@ export function App() {
             <button onClick={() => setDetailMode(2)}>› R_DISPLAYINFO 2 ‹</button>
             <button onClick={() => setDetailMode(0)}>› R_DISPLAYINFO 0 ‹</button>
             <button onClick={() => setIsPaused((value) => !value)}>› {isPaused ? "RESUME_OPS" : "PAUSE_OPS"} ‹</button>
-            <button onClick={sendDevDispatchTest}>› TEST_ALARM ‹</button>
+            <button onClick={() => {
+              sendDevDispatchTest();
+              if (window.SnareHoundAHK && typeof window.SnareHoundAHK.playAlert === "function") {
+                window.SnareHoundAHK.playAlert();
+              }
+            }}>› TEST_ALARM ‹</button>
             <button onClick={() => loadRecentHistory()}>› VIEW_HISTORY ‹</button>
             <button onClick={() => purgeRecentHistory()}>› PURGE_DATA ‹</button>
             <button onClick={nukeGlobal}>NUKE_GLOBAL</button>
@@ -649,6 +634,7 @@ export function App() {
 
           <div className="intel-input">
             <div className="status-line">[ PLAYER_INTELLIGENCE ]</div>
+            <div style={{height: '18px'}}></div>
             <form
               className="lookup-row"
               onSubmit={(event) => {
@@ -722,13 +708,16 @@ export function App() {
                 <div>
                   <div className="identity-handle">{lookupView.handle}</div>
                   <div className="identity-display">{lookupView.display}</div>
-                  <div className="identity-badge">{lookupView.badge}</div>
+                  <div className="identity-badge">
+                    {lookupView.badgeImage ? <img src={lookupView.badgeImage} alt="badge" style={{height:24,verticalAlign:'middle',marginRight:6}} /> : null}
+                    {lookupView.badge}
+                  </div>
                 </div>
               </div>
 
               <div className="intel-grid">
                 <div className="intel-block">
-                  <div className="intel-title">== ORG SUMMARY ==</div>
+                  <div className="intel-title" style={{textDecoration:'underline'}}>== ORG SUMMARY ==</div>
                   <div className="intel-row"><span className="intel-key">Org:</span><span className="intel-val">{lookupView.orgName}</span></div>
                   <div className="intel-row"><span className="intel-key">Rank:</span><span className="intel-val">{lookupView.orgRank}</span></div>
                   <div className="intel-row"><span className="intel-key">Org Tag:</span><span className="intel-val">{lookupView.orgSid}</span></div>
@@ -736,7 +725,7 @@ export function App() {
                 </div>
 
                 <div className="intel-block">
-                  <div className="intel-title">== PERSONAL INFO ==</div>
+                  <div className="intel-title" style={{textDecoration:'underline'}}>== PERSONAL INFO ==</div>
                   <div className="intel-row"><span className="intel-key">Enlisted:</span><span className="intel-val">{lookupView.enlisted}</span></div>
                   <div className="intel-row"><span className="intel-key">Location:</span><span className="intel-val">{lookupView.location}</span></div>
                   <div className="intel-row"><span className="intel-key">Languages:</span><span className="intel-val">{lookupView.languages}</span></div>
@@ -747,10 +736,10 @@ export function App() {
 
               {detailMode === 2 ? (
                 <>
-                  <div className="intel-title">== AFFILIATIONS ==</div>
+                  <div className="intel-title" style={{textDecoration:'underline'}}>== AFFILIATIONS ==</div>
                   <div className="intel-list">{lookupView.affiliations.length > 0 ? lookupView.affiliations.join(" · ") : "None"}</div>
 
-                  <div className="intel-title">== BIO ==</div>
+                  <div className="intel-title" style={{textDecoration:'underline'}}>== BIO ==</div>
                   <div className="intel-bio">{lookupView.bio || "No bio available."}</div>
                 </>
               ) : null}

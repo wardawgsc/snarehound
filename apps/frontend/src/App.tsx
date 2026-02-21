@@ -539,7 +539,22 @@ export function App() {
     <div className="hud-shell">
       <header className="hud-top">
         <span>SNARE HOUND // TACTICAL_PIRACY_HUD</span>
-        <span>RIGHT CLICK TITLE BAR TO MINIMIZE OR CLOSE</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {sessionToken && sessionInfo && (() => {
+            try {
+              const info = JSON.parse(sessionInfo);
+              if (info.user && info.user.username) {
+                return <>
+                  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="Discord" style={{ width: 20, height: 20, verticalAlign: 'middle', marginRight: 6, filter: 'invert(0.6)'}} />
+                  <span style={{ fontWeight: 600 }}>{info.user.username}</span>
+                </>;
+              }
+            } catch {}
+          })()}
+          {(!sessionToken || !sessionInfo || (() => { try { const info = JSON.parse(sessionInfo); return !(info.user && info.user.username); } catch { return true; } })()) && (
+            <span style={{ color: '#ffb347', fontWeight: 600 }}>LOGIN TO DISCORD</span>
+          )}
+        </span>
       </header>
 
       <div className="hud-grid">

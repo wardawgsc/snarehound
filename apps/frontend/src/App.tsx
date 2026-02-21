@@ -581,9 +581,10 @@ export function App() {
               const info = JSON.parse(sessionInfo);
               if (info.user && info.user.username) {
                 // Discord profile image URL: https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.png
-                const avatarUrl = info.user.avatar && info.user.id
-                  ? `https://cdn.discordapp.com/avatars/${info.user.id}/${info.user.avatar}.png`
-                  : "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg";
+                let avatarUrl = "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg";
+                if (info.user.avatar && info.user.id) {
+                  avatarUrl = `https://cdn.discordapp.com/avatars/${info.user.id}/${info.user.avatar}.png`;
+                }
                 return <>
                   <img src={avatarUrl} alt="Discord" style={{ width: 24, height: 24, borderRadius: '50%', verticalAlign: 'middle', marginRight: 6, background: '#23272a' }} />
                   <span style={{ fontWeight: 600 }}>{info.user.username}</span>
@@ -593,7 +594,7 @@ export function App() {
           })()}
           {(!sessionToken || !sessionInfo || (() => { try { const info = JSON.parse(sessionInfo); return !(info.user && info.user.username); } catch { return true; } })()) && (
             <a style={{ color: '#ffb347', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: 6 }} onClick={startDiscordAuth}>
-              <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="Discord" style={{ width: 20, height: 20, verticalAlign: 'middle', marginRight: 4 }} />
+              <img src="https://cdn.discordapp.com/icons/947078888232632410/a_2b7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e.png" alt="Discord" style={{ width: 20, height: 20, verticalAlign: 'middle', marginRight: 4 }} />
               LOGIN TO DISCORD
             </a>
           )}

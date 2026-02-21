@@ -123,7 +123,24 @@ function buildDiscordPayload(input: LookupPushPayload): Record<string, unknown> 
   const orgName = asString(organization?.name) || "None";
   const orgSid = asString(organization?.sid) || "N/A";
   const orgRank = asString(organization?.rank) || "N/A";
-  const orgMembers = asString(organization?.stars) || "N/A";
+  let orgMembers = "N/A";
+  if (typeof organization?.members === "number" && Number.isFinite(organization?.members)) {
+    orgMembers = String(organization.members);
+  } else if (typeof organization?.members === "string" && /^\d+$/.test(organization.members)) {
+    orgMembers = organization.members;
+  } else if (typeof organization?.member_count === "number" && Number.isFinite(organization?.member_count)) {
+    orgMembers = String(organization.member_count);
+  } else if (typeof organization?.member_count === "string" && /^\d+$/.test(organization.member_count)) {
+    orgMembers = organization.member_count;
+  } else if (typeof organization?.total_members === "number" && Number.isFinite(organization?.total_members)) {
+    orgMembers = String(organization.total_members);
+  } else if (typeof organization?.total_members === "string" && /^\d+$/.test(organization.total_members)) {
+    orgMembers = organization.total_members;
+  } else if (typeof organization?.population === "number" && Number.isFinite(organization?.population)) {
+    orgMembers = String(organization.population);
+  } else if (typeof organization?.population === "string" && /^\d+$/.test(organization.population)) {
+    orgMembers = organization.population;
+  }
   const orgUrl = orgSid !== "N/A" ? `https://robertsspaceindustries.com/orgs/${orgSid}` : "";
   const orgDisplay = orgUrl ? `[${orgName}](${orgUrl})` : orgName;
   const orgLogoUrl = asString(organization?.image);

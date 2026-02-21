@@ -19,6 +19,7 @@ declare global {
   interface Window {
     SnareHoundAHK?: {
       sendShowLocation?: () => void;
+      playAlert?: () => void;
       // Add other methods if needed
     };
   }

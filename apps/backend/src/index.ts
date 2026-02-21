@@ -142,8 +142,13 @@ function writeCorrectionsFile(correctionsFilePath: string, corrections: Map<stri
   fs.writeFileSync(correctionsFilePath, `${lines.join("\n")}\n`, "utf8");
 }
 
+// Handle multiple origins for CORS
+let allowedOrigins: string | string[] = config.CORS_ORIGIN;
+if (typeof allowedOrigins === "string" && allowedOrigins.includes(",")) {
+  allowedOrigins = allowedOrigins.split(",").map(origin => origin.trim());
+}
 void server.register(cors, {
-  origin: config.CORS_ORIGIN === "*" ? true : config.CORS_ORIGIN
+  origin: config.CORS_ORIGIN === "*" ? true : allowedOrigins
 });
 
 type SessionRequest = FastifyRequest & {

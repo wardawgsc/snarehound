@@ -1,0 +1,13 @@
+{
+  "name": "discord-webhook-mock",
+  "baseUrl": "http://localhost:5103",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/webhooks/:id/:token",
+      "response": {
+        "accepted": true
+      }
+    }
+  ]
+}

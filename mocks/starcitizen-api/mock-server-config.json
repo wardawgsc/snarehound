@@ -1,0 +1,19 @@
+{
+  "name": "starcitizen-api-mock",
+  "baseUrl": "http://localhost:5101",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/:apiKey/v1/live/user/:handle",
+      "response": {
+        "success": 1,
+        "data": {
+          "profile": {
+            "handle": "{{params.handle}}",
+            "display": "Mock Pilot"
+          }
+        }
+      }
+    }
+  ]
+}

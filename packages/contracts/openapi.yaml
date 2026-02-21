@@ -1,0 +1,72 @@
+openapi: 3.1.0
+info:
+  title: SnareHound v2 API
+  version: 0.1.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /v1/lookup/player/{handle}:
+    get:
+      summary: Lookup player profile
+      parameters:
+        - in: path
+          name: handle
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lookup response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LookupResponse'
+  /v1/push/lookup:
+    post:
+      summary: Push lookup embed to Discord (entitlement protected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LookupPushRequest'
+      responses:
+        '202':
+          description: Accepted
+        '403':
+          description: Not entitled
+components:
+  schemas:
+    LookupResponse:
+      type: object
+      properties:
+        source:
+          type: string
+          enum: [primary, secondary]
+        profile:
+          type: object
+          additionalProperties: true
+      required: [source, profile]
+    LookupPushRequest:
+      type: object
+      properties:
+        handle:
+          type: string
+        profile:
+          type: object
+          additionalProperties: true
+      required: [handle, profile]

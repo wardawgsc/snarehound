@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snarehound.local/contracts/events.schema.json",
+  "title": "SnareHound Events",
+  "oneOf": [
+    { "$ref": "#/$defs/ShipDetectedEvent" },
+    { "$ref": "#/$defs/LookupRequestedEvent" },
+    { "$ref": "#/$defs/LookupPushedEvent" }
+  ],
+  "$defs": {
+    "ShipDetectedEvent": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "ship.detected" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "shipName": { "type": "string" },
+        "signature": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["type", "timestamp", "shipName", "signature"],
+      "additionalProperties": false
+    },
+    "LookupRequestedEvent": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "lookup.requested" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "handle": { "type": "string" }
+      },
+      "required": ["type", "timestamp", "handle"],
+      "additionalProperties": false
+    },
+    "LookupPushedEvent": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "lookup.pushed" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "handle": { "type": "string" },
+        "destination": { "type": "string" },
+        "status": { "type": "string", "enum": ["accepted", "rejected", "failed"] }
+      },
+      "required": ["type", "timestamp", "handle", "destination", "status"],
+      "additionalProperties": false
+    }
+  }
+}

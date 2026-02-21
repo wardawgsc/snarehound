@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: snarehound-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm ci && npm run build -w @snarehound/backend
+    startCommand: npm run start -w @snarehound/backend
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://app.snarebears.com
+      - key: DISCORD_REDIRECT_URI
+        value: https://app.snarebears.com/auth/callback
+      - key: SESSION_TTL_SECONDS
+        value: "28800"
+      - key: ENABLE_DEV_ROUTES
+        value: "false"
+      - key: ENABLE_SECONDARY_LOOKUP
+        value: "true"
+      - key: SECONDARY_LOOKUP_PROVIDER
+        value: SENTRY
+      - key: SENTRY_API_BASE_URL
+        value: https://sentry-dev.wildknightsquadron.com/api/v1
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_REQUIRED_GUILD_ID
+        sync: false
+      - key: DISCORD_REQUIRED_ROLE_ID
+        sync: false
+      - key: STAR_CITIZEN_API_KEY
+        sync: false
+      - key: DISCORD_LOOKUP_WEBHOOK_URL
+        sync: false
+      - key: AGENT_SHARED_TOKEN
+        sync: false

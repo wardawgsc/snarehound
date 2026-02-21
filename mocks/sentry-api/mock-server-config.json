@@ -1,0 +1,15 @@
+{
+  "name": "sentry-api-mock",
+  "baseUrl": "http://localhost:5102",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/v1/users/:handle",
+      "response": {
+        "handle": "{{params.handle}}",
+        "source": "sentry",
+        "organization": "Mock Org"
+      }
+    }
+  ]
+}

@@ -292,27 +292,32 @@ export function App() {
   }, [lookupResponse, playerHandle]);
 
   useEffect(() => {
+    // Listen for Discord auth success
     const handler = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) {
-        return;
-      }
-
-      if (event.data?.type !== "snarehound-auth-success") {
-        return;
-      }
-
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "snarehound-auth-success") return;
       const token = typeof event.data.token === "string" ? event.data.token : "";
-      if (!token) {
-        return;
-      }
-
+      if (!token) return;
       setSessionToken(token);
       localStorage.setItem(SESSION_STORAGE_KEY, token);
       setSessionInfo(JSON.stringify({ user: event.data.user, entitled: event.data.entitled }, null, 2));
       setStatus("Discord auth completed and session token stored.");
     };
-
     window.addEventListener("message", handler);
+    // On mount, check session validity if token exists
+    const token = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (token) {
+      getSession(token).then(response => {
+        setSessionToken(token);
+        setSessionInfo(JSON.stringify(response, null, 2));
+        setStatus("Session is valid.");
+      }).catch(() => {
+        setSessionInfo("Session check failed.");
+        setStatus("Session invalid or expired. Please log in again.");
+        setSessionToken("");
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      });
+    }
     return () => window.removeEventListener("message", handler);
   }, []);
 
@@ -587,7 +592,10 @@ export function App() {
             } catch {}
           })()}
           {(!sessionToken || !sessionInfo || (() => { try { const info = JSON.parse(sessionInfo); return !(info.user && info.user.username); } catch { return true; } })()) && (
-            <a style={{ color: '#ffb347', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={startDiscordAuth}>LOGIN TO DISCORD</a>
+            <a style={{ color: '#ffb347', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: 6 }} onClick={startDiscordAuth}>
+              <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="Discord" style={{ width: 20, height: 20, verticalAlign: 'middle', marginRight: 4 }} />
+              LOGIN TO DISCORD
+            </a>
           )}
         </span>
       </header>

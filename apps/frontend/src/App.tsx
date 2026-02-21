@@ -338,9 +338,22 @@ export function App() {
         return;
       }
 
+      // 1. Lookup player info
       const response = await lookupPlayer(handle);
       setLookupResponse(response);
       setStatus("Lookup completed.");
+
+      // 2. Push to Discord if session token is present
+      if (sessionToken) {
+        try {
+          const pushResponse = await pushLookup(sessionToken.trim(), handle, response.profile);
+          setStatus(`Lookup completed and pushed to Discord (accepted=${pushResponse.accepted}, status=${pushResponse.status})`);
+        } catch (pushError) {
+          setStatus("Lookup succeeded, but push to Discord failed.");
+        }
+      } else {
+        setStatus("Lookup completed, but you are not logged in (no Discord push)." );
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Lookup failed.");
     }

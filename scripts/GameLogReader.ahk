@@ -1,4 +1,6 @@
 
+
+#Include %A_ScriptDir%\ObjToJson.ahk
 ; SnareHound Game.log Reader (System Tray)
 ; AutoHotkey v2
 
@@ -44,7 +46,7 @@ SendLogEvent(eventType, eventData := {}) {
         ; Merge extra eventData fields
         for k, v in eventData
             event[k] := v
-        payload := JSON.Stringify({
+        payload := ObjToJson({
             agentId: agentId,
             event: event
         })

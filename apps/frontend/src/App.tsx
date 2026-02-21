@@ -221,7 +221,12 @@ export function App() {
     const orgName = asString(summary?.organization) || asString(org?.name) || "None";
     const orgSid = asString(summary?.organizationSid) || asString(org?.sid) || "N/A";
     const orgRank = asString(summary?.organizationRank) || asString(org?.rank) || "N/A";
-    const orgMembers = asString(org?.stars) || "N/A";
+    // Try to get org member count from common fields
+    let orgMembers =
+      asString(org?.member_count) ||
+      asString(org?.members) ||
+      asString(org?.stars) ||
+      "N/A";
 
     const affiliations = affiliationsRaw
       .map((entry) => {
@@ -544,15 +549,19 @@ export function App() {
             try {
               const info = JSON.parse(sessionInfo);
               if (info.user && info.user.username) {
+                // Discord profile image URL: https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.png
+                const avatarUrl = info.user.avatar && info.user.id
+                  ? `https://cdn.discordapp.com/avatars/${info.user.id}/${info.user.avatar}.png`
+                  : "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg";
                 return <>
-                  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/discord.svg" alt="Discord" style={{ width: 20, height: 20, verticalAlign: 'middle', marginRight: 6, filter: 'invert(0.6)'}} />
+                  <img src={avatarUrl} alt="Discord" style={{ width: 24, height: 24, borderRadius: '50%', verticalAlign: 'middle', marginRight: 6, background: '#23272a' }} />
                   <span style={{ fontWeight: 600 }}>{info.user.username}</span>
                 </>;
               }
             } catch {}
           })()}
           {(!sessionToken || !sessionInfo || (() => { try { const info = JSON.parse(sessionInfo); return !(info.user && info.user.username); } catch { return true; } })()) && (
-            <span style={{ color: '#ffb347', fontWeight: 600 }}>LOGIN TO DISCORD</span>
+            <a style={{ color: '#ffb347', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={startDiscordAuth}>LOGIN TO DISCORD</a>
           )}
         </span>
       </header>
@@ -610,16 +619,7 @@ export function App() {
             </form>
           </div>
 
-          <div className="auth-box">
-            <button onClick={startDiscordAuth}>Open Discord Login</button>
-            <button onClick={checkSession}>Check Session</button>
-            <textarea
-              value={sessionToken}
-              onChange={(event) => setSessionToken(event.target.value)}
-              placeholder="Session token"
-            />
-            <pre>{sessionInfo}</pre>
-          </div>
+          {/* Auth box removed as login is now handled in header */}
 
           {showCorrections ? (
             <div className="corrections-box">

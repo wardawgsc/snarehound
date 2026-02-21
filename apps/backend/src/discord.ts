@@ -14,6 +14,7 @@ type DiscordUser = {
   username: string;
   discriminator: string;
   global_name: string | null;
+  avatar?: string;
 };
 
 type GuildMember = {

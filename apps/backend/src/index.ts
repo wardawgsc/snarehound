@@ -648,7 +648,8 @@ async function completeDiscordAuth(code: string, state: string) {
     expiresAt: session.expiresAt,
     user: {
       id: user.id,
-      username: session.username
+      username: session.username,
+      avatar: user.avatar || null
     },
     entitled: session.entitled
   };
@@ -749,10 +750,12 @@ server.get("/v1/auth/session", async (request: FastifyRequest, reply: FastifyRep
     return reply.code(401).send({ error: "Invalid or expired session" });
   }
 
+  // For now, avatar is not persisted in session, so just return null
   return reply.send({
     user: {
       id: session.userId,
-      username: session.username
+      username: session.username,
+      avatar: null
     },
     entitled: session.entitled,
     expiresAt: session.expiresAt

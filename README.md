@@ -1,2 +1,0 @@
-# snarehound
-companion app

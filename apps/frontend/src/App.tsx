@@ -633,9 +633,8 @@ export function App() {
             <button onClick={() => setIsPaused((value) => !value)}>› {isPaused ? "RESUME_OPS" : "PAUSE_OPS"} ‹</button>
             <button onClick={() => {
               sendDevDispatchTest();
-              if (window.SnareHoundAHK && typeof window.SnareHoundAHK.playAlert === "function") {
-                window.SnareHoundAHK.playAlert();
-              }
+              // Call local AHK HTTP server to play alert sound
+              fetch("http://localhost:29345/play-alert").catch(() => {});
             }}>› TEST_ALARM ‹</button>
             <button onClick={() => loadRecentHistory()}>› VIEW_HISTORY ‹</button>
             <button onClick={() => purgeRecentHistory()}>› PURGE_DATA ‹</button>

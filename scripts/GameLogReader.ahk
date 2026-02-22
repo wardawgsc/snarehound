@@ -1,8 +1,27 @@
 
 
 #Include %A_ScriptDir%\ObjToJson.ahk
-; SnareHound Game.log Reader (System Tray)
+#Include %A_ScriptDir%\AHKsock.ahk
+
+; SnareHound Game.log Reader (System Tray + HTTP server)
 ; AutoHotkey v2
+; --- HTTP server for local sound trigger ---
+PORT := 29345 ; You can change this port if needed
+AHKsock_Listen(PORT, "OnRequest")
+; Notify user
+TrayTip("SnareHound HTTP server running on port " PORT)
+
+OnRequest(socket, address, port, data) {
+    if InStr(data, "GET /play-alert") {
+        PlayAlert()
+        response := "HTTP/1.1 200 OK`r`nContent-Type: text/plain`r`n`r`nOK"
+        AHKsock_Send(socket, response)
+    } else {
+        response := "HTTP/1.1 404 Not Found`r`nContent-Type: text/plain`r`n`r`nNot Found"
+        AHKsock_Send(socket, response)
+    }
+    AHKsock_Close(socket)
+}
 
 backendUrl := "https://snarehound-backend-86hs.onrender.com/"
 agentToken := "dev-agent-token"
